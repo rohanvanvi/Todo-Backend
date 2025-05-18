@@ -78,8 +78,11 @@ export const loginController = asyncHandler(
 
 export const logOutController = asyncHandler(
   async (req: Request, res: Response) => {
+    // For JWT-based auth, client should remove the token
+    // Server-side we just send success response
     return res.status(HTTPSTATUS.OK).json({ 
-      message: "Logged out successfully" 
+      message: "Logged out successfully",
+      success: true
     });
   }
 );
