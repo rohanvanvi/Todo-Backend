@@ -28,7 +28,11 @@ app.set('trust proxy', 1);
 
 // CORS configuration
 app.use(cors({
-  origin: 'https://todo-rohan.vercel.app',
+  origin: [
+    'https://todo-frontend-2xjdq7xmm-rohan-vanvis-projects.vercel.app',
+    'https://todo-rohan.vercel.app',
+    'http://localhost:5173'
+  ],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   credentials: true,
   optionsSuccessStatus: 200
