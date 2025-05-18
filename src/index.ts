@@ -34,7 +34,7 @@ app.use(
   })
 );
 
-app.set('trust proxy', 1); // trust first proxy for secure cookies
+app.set('trust proxy', 1);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -45,34 +45,27 @@ app.use(
     name: "session",
     keys: [config.SESSION_SECRET],
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    secure: true, // Required for production
-    sameSite: 'none', // Required for cross-site cookies
+    secure: true,
+    sameSite: 'none',
     httpOnly: true,
-    domain: config.NODE_ENV === 'production' ? '.onrender.com' : undefined
+    domain: '.onrender.com'
   })
 );
 
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Root route
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "Todo API is running" });
+});
+
 // Health check endpoint
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
-app.get(
-  `/`,
-  asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-    throw new BadRequestException(
-      "This is a bad request",
-      ErrorCodeEnum.AUTH_INVALID_TOKEN
-    );
-    return res.status(HTTPSTATUS.OK).json({
-      message: "Hello Subscribe to the channel & share",
-    });
-  })
-);
-
+// API routes
 app.use(`${BASE_PATH}/auth`, authRoutes);
 app.use(`${BASE_PATH}/user`, isAuthenticated, userRoutes);
 app.use(`${BASE_PATH}/workspace`, isAuthenticated, workspaceRoutes);
@@ -80,6 +73,7 @@ app.use(`${BASE_PATH}/member`, isAuthenticated, memberRoutes);
 app.use(`${BASE_PATH}/project`, isAuthenticated, projectRoutes);
 app.use(`${BASE_PATH}/task`, isAuthenticated, taskRoutes);
 
+// Error handler should be last
 app.use(errorHandler);
 
 app.listen(config.PORT, async () => {
