@@ -1,16 +1,20 @@
-import UserModel from "../models/user.model";
-import { BadRequestException } from "../utils/appError";
+import { NotFoundException } from "../utils/appError";
+import { User } from "../models/user.model";
 
 export const getCurrentUserService = async (userId: string) => {
-  const user = await UserModel.findById(userId)
-    .populate("currentWorkspace")
-    .select("-password");
+  const user = await User.findById(userId).select("-password");
 
   if (!user) {
-    throw new BadRequestException("User not found");
+    throw new NotFoundException("User not found");
   }
 
-  return {
-    user,
-  };
+  return { user };
+};
+
+export const getUserById = async (userId: string) => {
+  const user = await User.findById(userId).select("-password");
+  if (!user) {
+    throw new NotFoundException("User not found");
+  }
+  return user;
 };
