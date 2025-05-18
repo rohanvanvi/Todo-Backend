@@ -26,10 +26,18 @@ const BASE_PATH = config.BASE_PATH;
 // Trust first proxy
 app.set('trust proxy', 1);
 
+// CORS configuration
+app.use(cors({
+  origin: 'https://todo-rohan.vercel.app',
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  credentials: true,
+  optionsSuccessStatus: 200
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Session configuration - must come before CORS
+// Session configuration
 app.use(
   session({
     name: "session",
@@ -38,17 +46,6 @@ app.use(
     secure: true,
     sameSite: 'none',
     httpOnly: true
-  })
-);
-
-// CORS configuration
-app.use(
-  cors({
-    origin: true, // This allows all origins but maintains CORS restrictions
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
-    exposedHeaders: ['set-cookie']
   })
 );
 
