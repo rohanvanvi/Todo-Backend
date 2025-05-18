@@ -46,15 +46,27 @@ app.use(
   session({
     name: "session",
     keys: [config.SESSION_SECRET],
-    maxAge: 24 * 60 * 60 * 1000,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
     secure: true,
     sameSite: 'none',
-    httpOnly: true
+    httpOnly: true,
+    signed: true,
+    path: '/'
   })
 );
 
+// Initialize Passport and restore authentication state from session
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Passport serialization
+passport.serializeUser((user: any, done) => {
+  done(null, user);
+});
+
+passport.deserializeUser((user: any, done) => {
+  done(null, user);
+});
 
 // Root route
 app.get("/", (req, res) => {
