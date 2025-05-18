@@ -3,8 +3,9 @@ import { asyncHandler } from "../middlewares/asyncHandler.middleware";
 import { config } from "../config/app.config";
 import { registerSchema } from "../validation/auth.validation";
 import { HTTPSTATUS } from "../config/http.config";
-import { registerUserService } from "../services/auth.service";
-import passport from "passport";
+import { registerUserService, verifyUserService } from "../services/auth.service";
+import jwt from 'jsonwebtoken';
+import { UnauthorizedException } from "../utils/appError";
 
 export const googleLoginCallback = asyncHandler(
   async (req: Request, res: Response) => {
@@ -16,8 +17,13 @@ export const googleLoginCallback = asyncHandler(
       );
     }
 
+    // Generate token for Google login
+    const token = jwt.sign({ id: req.user?._id }, config.JWT_SECRET, {
+      expiresIn: '24h'
+    });
+
     return res.redirect(
-      `${config.FRONTEND_ORIGIN}/workspace/${currentWorkspace}`
+      `${config.FRONTEND_GOOGLE_CALLBACK_URL}?token=${token}&workspace=${currentWorkspace}`
     );
   }
 );
@@ -28,70 +34,46 @@ export const registerUserController = asyncHandler(
       ...req.body,
     });
 
-    await registerUserService(body);
+    const user = await registerUserService(body);
+    
+    const token = jwt.sign({ id: user._id }, config.JWT_SECRET, {
+      expiresIn: '24h'
+    });
 
     return res.status(HTTPSTATUS.CREATED).json({
       message: "User created successfully",
+      token,
+      user
     });
   }
 );
 
 export const loginController = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    passport.authenticate(
-      "local",
-      (
-        err: Error | null,
-        user: Express.User | false,
-        info: { message: string } | undefined
-      ) => {
-        if (err) {
-          return next(err);
-        }
+    const { email, password } = req.body;
 
-        if (!user) {
-          return res.status(HTTPSTATUS.UNAUTHORIZED).json({
-            message: info?.message || "Invalid email or password",
-          });
-        }
+    try {
+      const user = await verifyUserService({ email, password });
+      
+      const token = jwt.sign({ id: user._id }, config.JWT_SECRET, {
+        expiresIn: '24h'
+      });
 
-        req.logIn(user, (err) => {
-          if (err) {
-            return next(err);
-          }
-
-          // Set cookie options
-          res.cookie('connect.sid', req.sessionID, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none',
-            maxAge: 24 * 60 * 60 * 1000 // 24 hours
-          });
-
-          return res.status(HTTPSTATUS.OK).json({
-            message: "Logged in successfully",
-            user
-          });
-        });
-      }
-    )(req, res, next);
+      return res.status(HTTPSTATUS.OK).json({
+        message: "Logged in successfully",
+        token,
+        user
+      });
+    } catch (error) {
+      throw new UnauthorizedException("Invalid email or password");
+    }
   }
 );
 
 export const logOutController = asyncHandler(
   async (req: Request, res: Response) => {
-    req.logout((err) => {
-      if (err) {
-        console.error("Logout error:", err);
-        return res
-          .status(HTTPSTATUS.INTERNAL_SERVER_ERROR)
-          .json({ error: "Failed to log out" });
-      }
+    return res.status(HTTPSTATUS.OK).json({ 
+      message: "Logged out successfully" 
     });
-
-    req.session = null;
-    return res
-      .status(HTTPSTATUS.OK)
-      .json({ message: "Logged out successfully" });
   }
 );

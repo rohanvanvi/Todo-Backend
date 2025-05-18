@@ -1,8 +1,8 @@
 import { NotFoundException } from "../utils/appError";
-import { User } from "../models/user.model";
+import UserModel from "../models/user.model";
 
 export const getCurrentUserService = async (userId: string) => {
-  const user = await User.findById(userId).select("-password");
+  const user = await UserModel.findById(userId).select("-password");
 
   if (!user) {
     throw new NotFoundException("User not found");
@@ -12,7 +12,7 @@ export const getCurrentUserService = async (userId: string) => {
 };
 
 export const getUserById = async (userId: string) => {
-  const user = await User.findById(userId).select("-password");
+  const user = await UserModel.findById(userId).select("-password");
   if (!user) {
     throw new NotFoundException("User not found");
   }
