@@ -22,13 +22,30 @@ import taskRoutes from "./routes/task.route";
 const app = express();
 const BASE_PATH = config.BASE_PATH;
 
-// CORS configuration
+// Security and CORS configuration
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  next();
+});
+
+const allowedOrigins = [
+  config.FRONTEND_ORIGIN,
+  'http://localhost:5173',
+  'https://todo-rohan.vercel.app',
+  'https://todo-frontend-2xjdq7xmm-rohan-vanvis-projects.vercel.app',
+];
+
 app.use(cors({
-  origin: [
-    'https://todo-frontend-2xjdq7xmm-rohan-vanvis-projects.vercel.app',
-    'https://todo-rohan.vercel.app',
-    'http://localhost:5173'
-  ],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   credentials: true,
   optionsSuccessStatus: 200
