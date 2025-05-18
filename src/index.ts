@@ -28,6 +28,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(
+  cors({
+    origin: [
+      'https://todo-rohan.vercel.app',
+      'http://localhost:5173',  // For local development
+      'http://localhost:3000'   // For local development alternative port
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+  })
+);
+
+app.use(
   session({
     name: "session",
     keys: [config.SESSION_SECRET],
@@ -40,13 +53,6 @@ app.use(
 
 app.use(passport.initialize());
 app.use(passport.session());
-
-app.use(
-  cors({
-    origin: config.FRONTEND_ORIGIN,
-    credentials: true,
-  })
-);
 
 app.get(
   `/`,
