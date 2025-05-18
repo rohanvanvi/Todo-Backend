@@ -23,36 +23,42 @@ import taskRoutes from "./routes/task.route";
 const app = express();
 const BASE_PATH = config.BASE_PATH;
 
-app.use(express.json());
-
-app.use(express.urlencoded({ extended: true }));
-
+// CORS configuration must come before any routes
 app.use(
   cors({
-    origin: [
-      'https://todo-rohan.vercel.app',
-      'http://localhost:5173',  // For local development
-      'http://localhost:3000'   // For local development alternative port
-    ],
+    origin: ['https://todo-rohan.vercel.app', 'http://localhost:5173', 'http://localhost:3000'],
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'Set-Cookie'],
+    exposedHeaders: ['Set-Cookie'],
   })
 );
 
+app.set('trust proxy', 1); // trust first proxy for secure cookies
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Session configuration
 app.use(
   session({
     name: "session",
     keys: [config.SESSION_SECRET],
-    maxAge: 24 * 60 * 60 * 1000,
-    secure: config.NODE_ENV === "production",
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    secure: true, // Required for production
+    sameSite: 'none', // Required for cross-site cookies
     httpOnly: true,
-    sameSite: "lax",
+    domain: config.NODE_ENV === 'production' ? '.onrender.com' : undefined
   })
 );
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Health check endpoint
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
 
 app.get(
   `/`,
