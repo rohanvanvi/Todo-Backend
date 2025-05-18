@@ -8,21 +8,28 @@ const isAuthenticated = async (req: Request, res: Response, next: NextFunction) 
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new UnauthorizedException("No token provided");
+      throw new UnauthorizedException("Please login to continue");
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, config.JWT_SECRET) as { id: string };
+    let decoded;
+    try {
+      decoded = jwt.verify(token, config.JWT_SECRET) as { id: string };
+    } catch (error) {
+      throw new UnauthorizedException("Session expired, please login again");
+    }
     
     const user = await getUserById(decoded.id);
     if (!user) {
-      throw new UnauthorizedException("User not found");
+      throw new UnauthorizedException("User not found, please login again");
     }
-
     req.user = user;
     next();
   } catch (error) {
-    throw new UnauthorizedException("Invalid or expired token");
+    if (error instanceof UnauthorizedException) {
+      throw error;
+    }
+    throw new UnauthorizedException("Authentication failed, please login again");
   }
 };
 

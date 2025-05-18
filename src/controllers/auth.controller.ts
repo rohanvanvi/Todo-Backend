@@ -58,21 +58,45 @@ export const loginController = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { email, password } = req.body;
 
-    try {
-      const user = await verifyUserService({ email, password });
-      
-      const token = jwt.sign({ id: user._id }, config.JWT_SECRET, {
-        expiresIn: '24h'
-      });
+    // Hardcoded credentials for hackathon demo
+    const demoEmail = 'example@gmail.com';
+    const demoPassword = 'example@123';
 
-      return res.status(HTTPSTATUS.OK).json({
-        message: "Logged in successfully",
-        token,
-        user
-      });
-    } catch (error) {
-      throw new UnauthorizedException("Invalid email or password");
+    if (email === demoEmail && password === demoPassword) {
+      try {
+        // Find the demo user or create if doesn't exist
+        let user = await verifyUserService({ email, password });
+        
+        const token = jwt.sign({ id: user._id }, config.JWT_SECRET, {
+          expiresIn: '7d' // Extended token expiry for demo
+        });
+
+        return res.status(HTTPSTATUS.OK).json({
+          message: "Logged in successfully",
+          token,
+          user
+        });
+      } catch (error) {
+        // If demo user doesn't exist in DB, create it
+        const newUser = await registerUserService({
+          email: demoEmail,
+          password: demoPassword,
+          name: 'Demo User'
+        });
+
+        const token = jwt.sign({ id: newUser.userId }, config.JWT_SECRET, {
+          expiresIn: '7d'
+        });
+
+        return res.status(HTTPSTATUS.OK).json({
+          message: "Logged in successfully",
+          token,
+          user: newUser
+        });
+      }
     }
+
+    throw new UnauthorizedException("Please use the demo account credentials");
   }
 );
 
