@@ -76,7 +76,7 @@ export const loginController = asyncHandler(
     };
 
     const token = jwt.sign({ id: demoUser._id }, config.JWT_SECRET, {
-      expiresIn: '7d' // Extended token expiry for demo
+      expiresIn: '24h' // Changed from 7d to 24h for demo
     });
 
     return res.status(HTTPSTATUS.OK).json({
