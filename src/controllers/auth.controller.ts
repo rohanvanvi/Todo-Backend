@@ -62,41 +62,28 @@ export const loginController = asyncHandler(
     const demoEmail = 'example@gmail.com';
     const demoPassword = 'example@123';
 
-    if (email === demoEmail && password === demoPassword) {
-      try {
-        // Find the demo user or create if doesn't exist
-        let user = await verifyUserService({ email, password });
-        
-        const token = jwt.sign({ id: user._id }, config.JWT_SECRET, {
-          expiresIn: '7d' // Extended token expiry for demo
-        });
+    // For hackathon demo, always succeed with demo user
+    const demoUser = {
+      _id: 'demo-user-id',
+      email: demoEmail,
+      name: 'Test Account',
+      profilePicture: null,
+      isActive: true,
+      lastLogin: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      currentWorkspace: 'demo-workspace-id'
+    };
 
-        return res.status(HTTPSTATUS.OK).json({
-          message: "Logged in successfully",
-          token,
-          user
-        });
-      } catch (error) {
-        // If demo user doesn't exist in DB, create it
-        const newUser = await registerUserService({
-          email: demoEmail,
-          password: demoPassword,
-          name: 'Demo User'
-        });
+    const token = jwt.sign({ id: demoUser._id }, config.JWT_SECRET, {
+      expiresIn: '7d' // Extended token expiry for demo
+    });
 
-        const token = jwt.sign({ id: newUser.userId }, config.JWT_SECRET, {
-          expiresIn: '7d'
-        });
-
-        return res.status(HTTPSTATUS.OK).json({
-          message: "Logged in successfully",
-          token,
-          user: newUser
-        });
-      }
-    }
-
-    throw new UnauthorizedException("Please use the demo account credentials");
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Logged in successfully",
+      token,
+      user: demoUser
+    });
   }
 );
 
