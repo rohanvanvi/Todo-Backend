@@ -1,42 +1,19 @@
 import { NextFunction, Request, Response } from "express";
 import { config } from "../config/app.config";
-import mongoose from "mongoose";
 import { UserDocument } from "../models/user.model";
 
-// Create a consistent demo user object that matches Mongoose Document structure
+// Create a consistent demo user object that matches the database user
 const createDemoUser = () => {
   const demoUser = {
-    _id: new mongoose.Types.ObjectId('000000000000000000000000'),
+    _id: '6828ecb231293ec06797420a',
     email: 'example@gmail.com' as string,
     name: 'Test Account' as string,
     profilePicture: null as string | null,
     isActive: true as boolean,
-    lastLogin: new Date() as Date | null,
-    createdAt: new Date() as Date,
-    updatedAt: new Date() as Date,
-    currentWorkspace: new mongoose.Types.ObjectId('000000000000000000000000') as mongoose.Types.ObjectId | null,
-    // Add Mongoose Document methods
-    $assertPopulated: () => {},
-    $clone: () => ({ ...demoUser }),
-    $getAllSubdocs: () => [],
-    $ignore: () => {},
-    $isDefault: () => false,
-    $isDeleted: () => false,
-    $getPopulatedDocs: () => [],
-    $isEmpty: () => false,
-    $isValid: () => true,
-    $locals: {},
-    $markValid: () => {},
-    $model: () => ({}),
-    $op: null,
-    $session: () => null,
-    $set: () => ({}),
-    baseModelName: null,
-    collection: {} as any,
-    db: {} as any,
-    errors: {},
-    isNew: false,
-    schema: {} as any,
+    lastLogin: null as Date | null,
+    createdAt: new Date('2025-05-17T20:08:18.709Z') as Date,
+    updatedAt: new Date('2025-05-18T18:19:21.240Z') as Date,
+    currentWorkspace: '6828ecb231293ec06797420e',
     // Add required UserDocument methods
     comparePassword: async () => true,
     omitPassword: function() { return this as unknown as Omit<UserDocument, 'password'> },

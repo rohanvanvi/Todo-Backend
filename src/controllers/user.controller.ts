@@ -1,17 +1,21 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../middlewares/asyncHandler.middleware";
 import { HTTPSTATUS } from "../config/http.config";
-import { getCurrentUserService } from "../services/user.service";
 
 export const getCurrentUserController = asyncHandler(
   async (req: Request, res: Response) => {
-    const userId = req.user?._id;
+    // For hackathon demo, return the user directly from req.user
+    const user = req.user;
 
-    const { user } = await getCurrentUserService(userId);
+    if (!user) {
+      return res.status(HTTPSTATUS.NOT_FOUND).json({
+        message: "User not found"
+      });
+    }
 
     return res.status(HTTPSTATUS.OK).json({
-      message: "User fetch successfully",
-      user,
+      message: "User fetched successfully",
+      user
     });
   }
 );

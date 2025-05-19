@@ -64,15 +64,15 @@ export const loginController = asyncHandler(
 
     // For hackathon demo, always succeed with demo user
     const demoUser = {
-      _id: 'demo-user-id',
+      _id: '6828ecb231293ec06797420a',
       email: demoEmail,
       name: 'Test Account',
       profilePicture: null,
       isActive: true,
-      lastLogin: new Date(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      currentWorkspace: 'demo-workspace-id'
+      lastLogin: null,
+      createdAt: new Date('2025-05-17T20:08:18.709Z'),
+      updatedAt: new Date('2025-05-18T18:19:21.240Z'),
+      currentWorkspace: '6828ecb231293ec06797420e'
     };
 
     const token = jwt.sign({ id: demoUser._id }, config.JWT_SECRET, {
